@@ -1,10 +1,10 @@
 // Set a map's, of the center of a city, view to our chose coordinates and a zoom level
-var mymap = L.map('mapid').setView([45.5428,-122.6544], 13)
+var mymap = L.map('mapid').setView([45.5428,-122.6544], 5)
 
 L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
     maxZoom: 18,
-    id: 'mapbox/streets-v11',
+    id: 'mapbox/dark-v10', //https://docs.mapbox.com/api/maps/#mapbox-styles
     tileSize: 512,
     zoomOffset: -1,
     accessToken: 'pk.eyJ1IjoieXVuaW5nbGl1IiwiYSI6ImNrNm9tNDFhcDBpejgzZG1sdnJuaTZ4MzYifQ.qYhM3_wrbL6lyTTccNKx_g' //'your.mapbox.access.token'
@@ -41,7 +41,7 @@ var popup = L.popup()
 function onMapClick(e) {
     popup
         .setLatLng(e.latlng)
-        .setContent("You clicked the map at " + e.latlng.toString())
+        .setContent("You clicked the map at " + e.latlng.toString())  //? How to avoid printing "Latlng"?
         .openOn(mymap);
 }
 
