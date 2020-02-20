@@ -11,7 +11,7 @@ function createMap(){
     // });
 
     //add OSM base tilelayer
-    mymap = L.map('mapid').setView([20,0], 2)
+    mymap = L.map('mapid').setView([40,-100],4)
 
     L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -30,8 +30,8 @@ function createMap(){
 //Rather than having to create the data in the script, we bring in our external data and pass it directly to L.geoJson()
 function getData(){
     //load the data
-    $.getJSON("data/MegaCities.geojson", function(response){
-            //create a Leaflet GeoJSON layer and add it to the map -> showed as a pin icon
+    $.getJSON("data/AmtrakStations.geojson", function(response){
+            //create a Leaflet GeoJSON layer and add it to the map
             // L.geoJson(response).addTo(mymap);
 
             //Convert GeoJSON points into Leaflet layers -> showed as a circle marker
