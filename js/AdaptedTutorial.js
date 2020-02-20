@@ -63,7 +63,7 @@ function getData(){
                                 popupContent += "<p>" + property + ": " + feature.properties[property]+ "</p>";   
                             }                        
                         }
-                        popupContent += "Unit per thousand passenger" // this line might be deleted later for better presentation
+                        popupContent += "Unit: per thousand passenger" // this line might be deleted later for better presentation
                         return layer.bindPopup(popupContent)
                     }
 
