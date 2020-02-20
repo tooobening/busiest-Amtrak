@@ -4,11 +4,6 @@ var mymap;
 
 //function to instantiate the Leaflet map
 function createMap(){
-    //create the map
-    // map = L.map('map', {
-    //     center: [20, 0],
-    //     zoom: 2
-    // });
 
     //add OSM base tilelayer
     mymap = L.map('mapid').setView([40,-100],4)
@@ -50,25 +45,25 @@ function getData(){
             }).addTo(mymap);
 
 
-            //Pop up each feature
-            //"properties": {
-    //     "City": "Tokyo",
-    //     "Pop_1985": 30.3,
-    //     "Pop_1990": 32.53,
-    //     "Pop_1995": 33.59,
-    //     "Pop_2000": 34.45,
-    //     "Pop_2005": 35.62,
-    //     "Pop_2010": 36.83,
-    //     "Pop_2015": 38,
-    //     "": ""
-    //   }, 
+            //Pop up selected feature
              L.geoJson(response, {
                 onEachFeature: function (feature,layer) {
                     var popupContent = ""; //define the string type
                     if (feature.properties) {
                         for (var property in feature.properties) {
-                            popupContent += "<p>" + property + ": " + feature.properties[property] + "</p>";   
+                            //select specific properties to be included in the popup window
+                            if (property === 'STNNAME' || 
+                            property ==="PASS_2012" || 
+                            property ==="PASS_2013" || 
+                            property ==="PASS_2014" || 
+                            property ==="PASS_2015" || 
+                            property ==="PASS_2016" || 
+                            property ==="PASS_2017" || 
+                            property ==="PASS_2018" ){
+                                popupContent += "<p>" + property + ": " + feature.properties[property]+ "</p>";   
+                            }                        
                         }
+                        popupContent += "Unit per thousand passenger" // this line might be deleted later for better presentation
                         return layer.bindPopup(popupContent)
                     }
 
