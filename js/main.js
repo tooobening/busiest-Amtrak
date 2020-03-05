@@ -30,10 +30,11 @@ function getData(mymap){
         success: function(response){
             //create an attributes array
             var attributes = processData(response);
-            
-            calcMinValue(response);
+            console.log("33")
+            minValue = calcMinValue(response);
             createPropSymbols(response, attributes);
-            createSequenceControls(attributes);
+            createSequenceControls();
+
 
         }
     });
@@ -73,24 +74,25 @@ function calcPropRadius(attValue) {
 };
 
 //Step 3: Add circle markers for point features to the map
-function createPropSymbols(data){
+function createPropSymbols(data, attributes){
     //create a Leaflet GeoJSON layer and add it to the map
     L.geoJson(data, {
-        pointToLayer: pointToLayer
+        pointToLayer: function(feature, latlng){
+            return pointToLayer(feature, latlng, attributes);
+        }
     }).addTo(mymap);
-}
-
+};
 
 
 
 
 
 //function to convert markers to circle markers
-function pointToLayer(feature, latlng,attributes){
+function pointToLayer(feature, latlng, attributes){
     //Determine which attribute to visualize with proportional symbols
     var attribute = attributes[0];
     //check
-    console.log(attribute);
+    console.log("check",attribute);
 
     //create marker options
     var options = {
@@ -142,6 +144,8 @@ function createSequenceControls(){
     });
     $('#panel').append('<button class="step" id="reverse">Reverse</button>');
     $('#panel').append('<button class="step" id="forward">Forward</button>');
+    $('#reverse').html('<img src="img/reverse.png">');
+    $('#forward').html('<img src="img/forward.png">');
 };
 
 function processData(data){
@@ -154,14 +158,11 @@ function processData(data){
     //push each attribute name into attributes array
     for (var attribute in properties){
         //only take attributes with population values
-        console.log(attribute)
-        // if (attribute[1:3] === "PASS"){
-        console.log(attribute[1,4])
+        if (attribute.substr(0,4) === "PASS"){
+            attributes.push(attribute)
         }
-        // if (attribute.indexOf("PASS") > -1){
-        //     attributes.push(attribute);
-        // };
-    // };
+
+    };
 
     //check result
     console.log(attributes);

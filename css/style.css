@@ -1,26 +1,30 @@
 #mapid { /*#id or .class*/
-    height:300px;
+    height:400px;
+    margin-left: 50px;
+    margin-right: 50px;
+
+
 }
 
 #panel {
-    width: 30%;
+    width: 25%;
     padding: 20px;
-    display: inline-block;
+    /* display: inline-block; */
     vertical-align: top;
     text-align: center;
-    line-height: 42px;
+    line-height: 50px;
 }
 
 .range-slider {
-    width: 55%;
+    width: 80%;
 }
 
 .step {
-	width: 20%;
+	width: 50%;
 }
 
 .step img {
-	width: 100%;
+	width: 40%;
 }
 
 
