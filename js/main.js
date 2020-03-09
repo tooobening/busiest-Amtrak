@@ -81,7 +81,7 @@ function createPropSymbols(data, attributes){
             return pointToLayer(feature, latlng, attributes);        }
     }).addTo(mymap);
 };
-//function to convert markers to circle markers
+//Convert markers to circle markers
 function pointToLayer(feature, latlng, attributes){
     //Determine which attribute to visualize with proportional symbols
     var attribute = attributes[0];
@@ -104,28 +104,61 @@ function pointToLayer(feature, latlng, attributes){
     //create circle marker layer
     var layer = L.circleMarker(latlng, options);
 
-    //build popup content string
-    var popupContent = "<p><b>Station Name:</b> " + feature.properties.STNNAME + "</p>";
-    //add formatted attribute to popup content string
-    var year = attribute.split("_")[1]; //extract year after "_"
-    popupContent += "<p><b>Passenger in " + year + ":</b> " + feature.properties[attribute] + " thousand</p>";
+    //popupContent += "<p><b>Passenger in " + year + ":</b> " + feature.properties[attribute] + " thousand</p>"; --replaced as OOP
+    var popupContent = new PopupContent(feature.properties, attribute);
 
-    //bind the popup to the circle marker
-
-    layer.bindPopup(popupContent, {
-        offset: new L.Point(0,-options.radius) //offset the popup based on its radius not to cover the proportional symbol
+    //add popup to circle marker
+    layer.bindPopup(popupContent.formatted,{
+        offset: new L.Point(0,-options.radius)//offset the popup based on its radius not to cover the proportional symbol
     });
-    
+
     //return the circle marker to the L.geoJson pointToLayer option
     return layer;
 };
+
+//-------------OOP---------------//
+function PopupContent(properties, attribute){
+    this.properties = properties;
+    this.attribute = attribute;
+    this.year = attribute.split("_")[1];
+    this.population = this.properties[attribute];
+    this.formatted = "<p><b>City:</b> " + this.properties.STNNAME + "</p><p><b>Population in " + this.year + ":</b> " + this.population + " million</p>";
+};
+
 
 
 //-----------------Panel---------------------//
 //Step 1: Create new sequence controls
 function createSequenceControls(attributes){
-    //create range input element (slider)
-    $('#panel').append('<input class="range-slider" type="range">');
+    var SequenceControl = L.Control.extend({ //to add properties and methods to the class prototype object;the revised object becomes the prototype for SequenceControl
+        options: {
+            position: 'bottomleft'
+        },
+
+        onAdd: function () { //onnAdd() always is required for a new Leaflet control!
+            // create the control container div with a particular class name; more convenient than document.createElement() method.
+            var container = L.DomUtil.create('div', 'sequence-control-container');
+
+            //create range input element (slider)
+            $(container).append('<input class="range-slider" type="range">');
+            //add skip buttons
+            $(container).append('<button class="step" id="reverse" title="Reverse">Reverse</button>');
+            $(container).append('<button class="step" id="forward" title="Forward">Forward</button>');
+
+            //disable any mouse event listeners for the container
+            L.DomEvent.disableClickPropagation(container);
+
+            // ... initialize other DOM elements
+
+
+            return container;
+        }
+    });
+
+    mymap.addControl(new SequenceControl());
+
+    // //create range input element (slider)
+    // $('#panel').append('<input class="range-slider" type="range">');
     
     //set slider attributes
     $('.range-slider').attr({
@@ -134,11 +167,13 @@ function createSequenceControls(attributes){
         value: 0,
         step: 1
     });
-    $('#panel').append('<button class="step" id="reverse">Reverse</button>');
-    $('#panel').append('<button class="step" id="forward">Forward</button>');
+    // $('#panel').append('<button class="step" id="reverse">Reverse</button>');
+    // $('#panel').append('<button class="step" id="forward">Forward</button>');
     $('#reverse').html('<img src="img/reverse.png">');
     $('#forward').html('<img src="img/forward.png">');
     //Step 5: click listener for buttons
+
+    // Add listeners after adding control
     $('.step').click(function(){
         //get the old index value
         var index = $('.range-slider').val();
@@ -168,7 +203,7 @@ function createSequenceControls(attributes){
 
 
 
-//Step 10: Resize proportional symbols according to new attribute values
+//Step 10: Resize proportional symbols according to new attribute values and renew the popup!
 function updatePropSymbols(attribute){
     mymap.eachLayer(function(layer){
         if (layer.feature && layer.feature.properties[attribute]){
@@ -181,15 +216,12 @@ function updatePropSymbols(attribute){
             layer.setRadius(radius);
 
             //add city to popup content string
-            var popupContent = "<p><b>City:</b> " + props.STNNAME + "</p>";
-
-            //add formatted attribute to panel content string
-            var year = attribute.split("_")[1];
-            popupContent += "<p><b>Population in " + year + ":</b> " + props[attribute] + " thousand</p>";
+            // var popupContent = "<p><b>City:</b> " + props.STNNAME + "</p>"; -->replaced as OOP
+            var popupContent = new PopupContent(props, attribute);
 
             //update popup content
             popup = layer.getPopup();
-            popup.setContent(popupContent).update();
+            popup.setContent(popupContent.formatted).update(); //OOP
         };
     });
 };

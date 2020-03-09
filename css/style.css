@@ -1,37 +1,67 @@
 #mapid { /*#id or .class*/
-    height:400px;
-    margin-left: 50px;
-    margin-right: 50px;
-
+    height: 400px;
+    width: 100%;
+    display: inline-block;
 
 }
 
-#panel {
-    width: 25%;
-    padding: 20px;
-    /* display: inline-block; */
-    vertical-align: top;
+
+
+.sequence-control-container {
+    width: 300px;
+    height: 30px;
+    background-color: rgb(77, 77, 138,0.9);
+    border-radius: 20px;
+    padding: 10px;
+    line-height: 45px;
     text-align: center;
-    line-height: 50px;
+    border: solid gray 0px;
 }
 
 .range-slider {
-    width: 80%;
+    width: 200px;
 }
 
 .step {
-	width: 50%;
+    width:40px;
+    border:0px;
+    border-radius: 20px;
+    
+
 }
+
 
 .step img {
-	width: 40%;
+   width: 100%;
+   height: auto;
+   filter: invert(100%);
+  
 }
 
+
+/* #panel {
+    width: 25%;
+    padding: 20px;
+    display: inline-block;
+    vertical-align: top;
+    text-align: center;
+    line-height: 50px;
+} */
 
 #forward {
     float: right;
+    background-color: rgb(77, 77, 138);
+}
+
+#forward:hover{
+    background-color: rgba(216, 77, 67, 0.9);
 }
 
 #reverse {
     float: left;
+    background-color: rgb(77, 77, 138);
+}
+
+#reverse:hover{
+    background-color: rgba(216, 77, 67, 0.9);
 }

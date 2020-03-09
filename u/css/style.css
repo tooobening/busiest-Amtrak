@@ -1,0 +1,35 @@
+#mapid { /*#id or .class*/
+    height:400px;
+    margin-left: 50px;
+    margin-right: 50px;
+}
+
+#panel {
+    width: 25%;
+    padding: 20px;
+    display: inline-block;
+    vertical-align: top;
+    text-align: center;
+    line-height: 50px;
+}
+
+.range-slider {
+    width: 80%;
+}
+
+.step {
+	width: 50%;
+}
+
+.step img {
+	width: 40%;
+}
+
+
+#forward {
+    float: right;
+}
+
+#reverse {
+    float: left;
+}
