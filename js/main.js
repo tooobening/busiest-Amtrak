@@ -33,6 +33,7 @@ function getData(mymap){
             minValue = calcMinValue(response);
             createPropSymbols(response, attributes);
             createSequenceControls(attributes); // Important to add parameter at this place!
+            createLegend(mymap,attributes);
 
 
 
@@ -132,7 +133,7 @@ function PopupContent(properties, attribute){
 function createSequenceControls(attributes){
     var SequenceControl = L.Control.extend({ //to add properties and methods to the class prototype object;the revised object becomes the prototype for SequenceControl
         options: {
-            position: 'bottomleft'
+            position: 'bottomleft' //'topleft', 'topright'(default), 'bottomleft' or 'bottomright'
         },
 
         onAdd: function () { //onnAdd() always is required for a new Leaflet control!
@@ -191,13 +192,67 @@ function createSequenceControls(attributes){
 
         //Step 8: update slider
         $('.range-slider').val(index);
-        console.log('161',attributes[index])
          //Called in both step button and slider event listener handlers
         //Step 9: pass new attribute to update symbols
         updatePropSymbols(attributes[index]);
     });
     
 
+};
+
+function createLegend(map, attributes){
+    var LegendControl = L.Control.extend({
+        options: {
+            position: 'topleft'
+        },
+
+        onAdd: function (map) {
+            // create the control container with a particular class name
+            var container = L.DomUtil.create('div', 'legend-control-container');
+
+            //add temporal legend div to container
+            $(container).append('<div id="temporal-legend">')
+
+            //Step 1: start attribute legend svg string
+            var svg = '<svg id="attribute-legend" width="130px" height="130px">';
+
+            //add attribute legend svg to container
+            $(container).append(svg);
+
+            return container;
+        }
+    });
+
+    map.addControl(new LegendControl());
+
+    updateLegend(map, attributes[0]);
+};
+
+function updateLegend(map,attribute){
+    map.eachLayer(function(layer){
+        if (layer.feature && layer.feature.properties[attribute]){
+            //update the layer style and popup
+            //access feature properties
+            var props = layer.feature.properties;
+
+            //update each feature's radius based on new attribute values
+            var radius = calcPropRadius(props[attribute]);
+            layer.setRadius(radius);
+
+            //add city to popup content string
+            // var popupContent = "<p><b>City:</b> " + props.STNNAME + "</p>"; -->replaced as OOP
+            var popupContent = new PopupContent(props, attribute);
+
+            //update popup content
+            popup = layer.getPopup();
+            //create another popup based on the first
+            var popupContent2 = Object.create(popupContent);
+
+            //change the formatting of popup 2
+            popupContent2.formatted = "<h2>Passenger in" + popupContent.year + ":</h2>";            
+            popup.setContent(popupContent2.formatted).update(); //OOP
+        };
+    });
 };
 
 

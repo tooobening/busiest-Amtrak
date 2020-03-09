@@ -1,11 +1,20 @@
 #mapid { /*#id or .class*/
-    height: 400px;
+    height: 480px;
     width: 100%;
     display: inline-block;
 
 }
 
-
+.legend-control-container {
+    width: 100px;
+    height: 100px;
+    background-color: rgb(77, 77, 138,0.9);
+    border-radius: 20px;
+    padding: 10px;
+    line-height: 45px;
+    text-align: center;
+    border: solid gray 0px; 
+}
 
 .sequence-control-container {
     width: 300px;
@@ -20,6 +29,10 @@
 
 .range-slider {
     width: 200px;
+}
+
+.temperal-legend{
+    width: 80px;
 }
 
 .step {
@@ -64,4 +77,9 @@
 
 #reverse:hover{
     background-color: rgba(216, 77, 67, 0.9);
+}
+
+
+#temp{
+    float: right;
 }
