@@ -32,7 +32,7 @@ function getData(mymap){
             var attributes = processData(response);
             minValue = calcMinValue(response);
             createPropSymbols(response, attributes);
-            createSequenceControls(attributes);
+            createSequenceControls(attributes); // Important to add parameter at this place!
 
 
 
