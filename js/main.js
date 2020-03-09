@@ -30,10 +30,10 @@ function getData(mymap){
         success: function(response){
             //create an attributes array
             var attributes = processData(response);
-            console.log("33")
             minValue = calcMinValue(response);
             createPropSymbols(response, attributes);
-            createSequenceControls();
+            createSequenceControls(attributes);
+
 
 
         }
@@ -78,21 +78,13 @@ function createPropSymbols(data, attributes){
     //create a Leaflet GeoJSON layer and add it to the map
     L.geoJson(data, {
         pointToLayer: function(feature, latlng){
-            return pointToLayer(feature, latlng, attributes);
-        }
+            return pointToLayer(feature, latlng, attributes);        }
     }).addTo(mymap);
 };
-
-
-
-
-
 //function to convert markers to circle markers
 function pointToLayer(feature, latlng, attributes){
     //Determine which attribute to visualize with proportional symbols
     var attribute = attributes[0];
-    //check
-    console.log("check",attribute);
 
     //create marker options
     var options = {
@@ -131,7 +123,7 @@ function pointToLayer(feature, latlng, attributes){
 
 //-----------------Panel---------------------//
 //Step 1: Create new sequence controls
-function createSequenceControls(){
+function createSequenceControls(attributes){
     //create range input element (slider)
     $('#panel').append('<input class="range-slider" type="range">');
     
@@ -146,7 +138,66 @@ function createSequenceControls(){
     $('#panel').append('<button class="step" id="forward">Forward</button>');
     $('#reverse').html('<img src="img/reverse.png">');
     $('#forward').html('<img src="img/forward.png">');
+    //Step 5: click listener for buttons
+    $('.step').click(function(){
+        //get the old index value
+        var index = $('.range-slider').val();
+
+        //Step 6: increment or decrement depending on button clicked
+        if ($(this).attr('id') == 'forward'){
+            index++;
+            //Step 7: if past the last attribute, wrap around to first attribute
+            index = index > 6 ? 0 : index;
+        } else if ($(this).attr('id') == 'reverse'){
+            index--;
+            //Step 7: if past the first attribute, wrap around to last attribute
+            index = index < 0 ? 6 : index;
+        };
+
+        //Step 8: update slider
+        $('.range-slider').val(index);
+        console.log('161',attributes[index])
+         //Called in both step button and slider event listener handlers
+        //Step 9: pass new attribute to update symbols
+        updatePropSymbols(attributes[index]);
+    });
+    
+
 };
+
+
+
+
+//Step 10: Resize proportional symbols according to new attribute values
+function updatePropSymbols(attribute){
+    mymap.eachLayer(function(layer){
+        if (layer.feature && layer.feature.properties[attribute]){
+            //update the layer style and popup
+            //access feature properties
+            var props = layer.feature.properties;
+
+            //update each feature's radius based on new attribute values
+            var radius = calcPropRadius(props[attribute]);
+            layer.setRadius(radius);
+
+            //add city to popup content string
+            var popupContent = "<p><b>City:</b> " + props.STNNAME + "</p>";
+
+            //add formatted attribute to panel content string
+            var year = attribute.split("_")[1];
+            popupContent += "<p><b>Population in " + year + ":</b> " + props[attribute] + " thousand</p>";
+
+            //update popup content
+            popup = layer.getPopup();
+            popup.setContent(popupContent).update();
+        };
+    });
+};
+
+
+
+
+
 
 function processData(data){
     //empty array to hold attributes
@@ -163,10 +214,6 @@ function processData(data){
         }
 
     };
-
-    //check result
-    console.log(attributes);
-
     return attributes;
 };
 
