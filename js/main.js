@@ -2,6 +2,7 @@
 //declare map var in global scope
 var mymap;
 var minValue;
+var dataStats = {};
 
 //step 1 create map
 function createMap(){
@@ -30,10 +31,11 @@ function getData(mymap){
         success: function(response){
             //create an attributes array
             var attributes = processData(response);
-            minValue = calcMinValue(response);
+            calcStats(response);
+            minValue = dataStats.min
             createPropSymbols(response, attributes);
             createSequenceControls(attributes); // Important to add parameter at this place!
-            createLegend(mymap,attributes);
+            // createLegend(mymap,attributes);
 
 
 
@@ -41,25 +43,69 @@ function getData(mymap){
     });
 };
 
-function calcMinValue(data){
-     
+//Step 3: Add circle markers for point features to the map
+function createPropSymbols(data, attributes){
+    //create a Leaflet GeoJSON layer and add it to the map
+    L.geoJson(data, {
+        pointToLayer: function(feature, latlng){
+            return pointToLayer(feature, latlng, attributes);}
+    }).addTo(mymap);
+};
+//Convert markers to circle markers
+function pointToLayer(feature, latlng, attributes){
+    //Determine which attribute to visualize with proportional symbols
+    var attribute = attributes[0];
+    //create marker options
+    var options = {
+        fillColor: "#ffffcc",
+        color: "#001",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+    };
+
+    //For each feature, determine its value for the selected attribute
+    var attValue = Number(feature.properties[attribute]);
+
+    //Give each feature's circle marker a radius based on its attribute value(=population!)
+    options.radius = calcPropRadius(attValue);
+
+    //create circle marker layer
+    var layer = L.circleMarker(latlng, options);
+
+    //popupContent += "<p><b>Passenger in " + year + ":</b> " + feature.properties[attribute] + " thousand</p>"; --replaced as OOP
+    var popupContent = new PopupContent(feature.properties, attribute);
+
+    //add popup to circle marker
+    layer.bindPopup(popupContent.formatted,{
+        offset: new L.Point(0,-options.radius)//offset the popup based on its radius not to cover the proportional symbol
+    });
+    //return the circle marker to the L.geoJson pointToLayer option
+    return layer;
+};
+//Store the calculated max, mean, and min values as properties in a new, globally accessible dataStats object
+function calcStats(data){
     //create empty array to store all data values
     var allValues = [];
+
     //loop through each city
     for(var city of data.features){
-         //loop through each year
-         for(var year = 2012; year <= 2018; year+=1){
-               //get population for current year
-              var value = city.properties["PASS_"+ String(year)];
-              //add value to array
-              allValues.push(value);
-          }
-    }
     
-    //get minimum value of our array
-    var minValue = Math.min(...allValues)
+        //loop through each year
+        for(var year = 2012; year <= 2018; year+=1){
+            //get population for current year
+           var value = city.properties["PASS_"+ String(year)];
 
-    return minValue;
+            //add value to array
+            allValues.push(value);
+        }
+    }
+    //get min, max, mean stats for our array
+    dataStats.min = Math.min(...allValues);
+    dataStats.max = Math.max(...allValues);
+    //calculate mean
+    var sum = allValues.reduce(function(a, b){return a+b;}); //(accumulator,current value)
+    dataStats.mean = sum/ allValues.length;
 }
 
 //calculate the radius of each proportional symbol
@@ -74,72 +120,14 @@ function calcPropRadius(attValue) {
     return radius;
 };
 
-//Step 3: Add circle markers for point features to the map
-function createPropSymbols(data, attributes){
-    //create a Leaflet GeoJSON layer and add it to the map
-    L.geoJson(data, {
-        pointToLayer: function(feature, latlng){
-            return pointToLayer(feature, latlng, attributes);        }
-    }).addTo(mymap);
-};
-//Convert markers to circle markers
-function pointToLayer(feature, latlng, attributes){
-    //Determine which attribute to visualize with proportional symbols
-    var attribute = attributes[0];
-
-    //create marker options
-    var options = {
-        fillColor: "#ffffcc",
-        color: "#001",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
-    };
-
-    //For each feature, determine its value for the selected attribute
-    var attValue = Number(feature.properties[attribute]);
-
-    //Give each feature's circle marker a radius based on its attribute value
-    options.radius = calcPropRadius(attValue);
-
-    //create circle marker layer
-    var layer = L.circleMarker(latlng, options);
-
-    //popupContent += "<p><b>Passenger in " + year + ":</b> " + feature.properties[attribute] + " thousand</p>"; --replaced as OOP
-    var popupContent = new PopupContent(feature.properties, attribute);
-
-    //add popup to circle marker
-    layer.bindPopup(popupContent.formatted,{
-        offset: new L.Point(0,-options.radius)//offset the popup based on its radius not to cover the proportional symbol
-    });
-
-    //return the circle marker to the L.geoJson pointToLayer option
-    return layer;
-};
-
-//-------------OOP---------------//
-function PopupContent(properties, attribute){
-    this.properties = properties;
-    this.attribute = attribute;
-    this.year = attribute.split("_")[1];
-    this.population = this.properties[attribute];
-    this.formatted = "<p><b>City:</b> " + this.properties.STNNAME + "</p><p><b>Population in " + this.year + ":</b> " + this.population + " million</p>";
-};
-
-
-
 //-----------------Panel---------------------//
-//Step 1: Create new sequence controls
 function createSequenceControls(attributes){
     var SequenceControl = L.Control.extend({ //to add properties and methods to the class prototype object;the revised object becomes the prototype for SequenceControl
-        options: {
-            position: 'bottomleft' //'topleft', 'topright'(default), 'bottomleft' or 'bottomright'
-        },
-
+        options: {position: 'bottomleft'} ,//'topleft', 'topright'(default), 'bottomleft' or 'bottomright'
         onAdd: function () { //onnAdd() always is required for a new Leaflet control!
             // create the control container div with a particular class name; more convenient than document.createElement() method.
             var container = L.DomUtil.create('div', 'sequence-control-container');
-
+            $(container).append('<h1>Year from 2012-2018</h1>');
             //create range input element (slider)
             $(container).append('<input class="range-slider" type="range">');
             //add skip buttons
@@ -149,18 +137,45 @@ function createSequenceControls(attributes){
             //disable any mouse event listeners for the container
             L.DomEvent.disableClickPropagation(container);
 
-            // ... initialize other DOM elements
+            // ... initialize other DOM elements (??)
 
+            return container;
+        }
+    });
+    var LegendControl = L.Control.extend({
+        options: {position: 'topleft'},
+        onAdd: function () {
+            // create the control container with a particular class name
+            var container = L.DomUtil.create('div', 'legend-control-container');
+            // $(container).append(popupContent2.formatted);
+            //add temporal legend div to container
+            $(container).append('<div class="temporal-legend">')
+
+            //Step 1: start attribute legend svg string
+            var svg = '<svg id="attribute-legend" width="130px" height="130px">';
+            //array of circle names to base loop on
+            var circles = ["max", "mean", "min"];
+
+            //Step 2: loop to add each circle and text to svg string
+            for (var i=0; i<circles.length; i++){
+                //Step 3: assign the r and cy attributes
+                var radius = calcPropRadius(dataStats[circles[i]]);
+                var cy = 130 - radius;
+
+                //circle string
+                svg += '<circle class="legend-circle" id="' + circles[i] + '" r="' + radius + '"cy="' + cy + '" fill="#FAF8CB" fill-opacity="0.8" stroke="#000000" cx="65"/>';
+            };
+
+            //close svg string
+            svg += "</svg>";
 
             return container;
         }
     });
 
+    mymap.addControl(new LegendControl());
     mymap.addControl(new SequenceControl());
 
-    // //create range input element (slider)
-    // $('#panel').append('<input class="range-slider" type="range">');
-    
     //set slider attributes
     $('.range-slider').attr({
         max: 6,
@@ -168,17 +183,18 @@ function createSequenceControls(attributes){
         value: 0,
         step: 1
     });
-    // $('#panel').append('<button class="step" id="reverse">Reverse</button>');
-    // $('#panel').append('<button class="step" id="forward">Forward</button>');
     $('#reverse').html('<img src="img/reverse.png">');
     $('#forward').html('<img src="img/forward.png">');
-    //Step 5: click listener for buttons
-
-    // Add listeners after adding control
+    //var index = $('.range-slider').val();  //-->default index value = 0 (before clicking any button!)
+    //console.log('190:',index) //--> default attributes[0] = "PASS_2012"
+    // var word = "<p>Passenger in "+ attributes[index].substr(5,8)+":</p>"
+    // $('.legend-control-container').append(word);
+    var word = "<h1>Passenger in "+ attributes[0].substr(5,8)+":</h1>"
+    $('.legend-control-container').html(word); 
+    //click listener for buttons (Add listeners after adding control!)
     $('.step').click(function(){
         //get the old index value
-        var index = $('.range-slider').val();
-
+        var index = $('.range-slider').val(); 
         //Step 6: increment or decrement depending on button clicked
         if ($(this).attr('id') == 'forward'){
             index++;
@@ -189,76 +205,20 @@ function createSequenceControls(attributes){
             //Step 7: if past the first attribute, wrap around to last attribute
             index = index < 0 ? 6 : index;
         };
-
         //Step 8: update slider
         $('.range-slider').val(index);
-         //Called in both step button and slider event listener handlers
+        //Called in both step button and slider event listener handlers
         //Step 9: pass new attribute to update symbols
         updatePropSymbols(attributes[index]);
-    });
-    
+        var word = "<h1>Passenger in "+ attributes[index].substr(5,8)+":</h1>"
+        $('.legend-control-container').html(word); 
 
-};
-
-function createLegend(map, attributes){
-    var LegendControl = L.Control.extend({
-        options: {
-            position: 'topleft'
-        },
-
-        onAdd: function (map) {
-            // create the control container with a particular class name
-            var container = L.DomUtil.create('div', 'legend-control-container');
-
-            //add temporal legend div to container
-            $(container).append('<div id="temporal-legend">')
-
-            //Step 1: start attribute legend svg string
-            var svg = '<svg id="attribute-legend" width="130px" height="130px">';
-
-            //add attribute legend svg to container
-            $(container).append(svg);
-
-            return container;
-        }
-    });
-
-    map.addControl(new LegendControl());
-
-    updateLegend(map, attributes[0]);
-};
-
-function updateLegend(map,attribute){
-    map.eachLayer(function(layer){
-        if (layer.feature && layer.feature.properties[attribute]){
-            //update the layer style and popup
-            //access feature properties
-            var props = layer.feature.properties;
-
-            //update each feature's radius based on new attribute values
-            var radius = calcPropRadius(props[attribute]);
-            layer.setRadius(radius);
-
-            //add city to popup content string
-            // var popupContent = "<p><b>City:</b> " + props.STNNAME + "</p>"; -->replaced as OOP
-            var popupContent = new PopupContent(props, attribute);
-
-            //update popup content
-            popup = layer.getPopup();
-            //create another popup based on the first
-            var popupContent2 = Object.create(popupContent);
-
-            //change the formatting of popup 2
-            popupContent2.formatted = "<h2>Passenger in" + popupContent.year + ":</h2>";            
-            popup.setContent(popupContent2.formatted).update(); //OOP
-        };
+        
+        // updateLegend(attributes[index]);
+        
     });
 };
-
-
-
-
-//Step 10: Resize proportional symbols according to new attribute values and renew the popup!
+//Resize proportional symbols according to new attribute values and renew the popup!
 function updatePropSymbols(attribute){
     mymap.eachLayer(function(layer){
         if (layer.feature && layer.feature.properties[attribute]){
@@ -280,12 +240,139 @@ function updatePropSymbols(attribute){
         };
     });
 };
+// function updateLegend(attribute){
+//     mymap.eachLayer(function(layer){
+//         if (layer.feature && layer.feature.properties[attribute]){
+//             //update the layer style and popup
+//             //access feature properties
+//             var props = layer.feature.properties;
+
+//             //update each feature's radius based on new attribute values
+//             var radius = calcPropRadius(props[attribute]);
+//             layer.setRadius(radius);
+
+//             // var word = "<p>Passenger in "+ attribute.substr(5,8)+":</p>"
+
+//             //add city to popup content string
+//             // var popupContent = "<p><b>City:</b> " + props.STNNAME + "</p>"; -->replaced as OOP
+//             var popupContent2 = new PopupContent(props, attribute);
+//             popupContent2.formatted = "<h2>Passenger in" + popupContent2.year + ":</h2>";            
+
+//             //update popup content
+//             popup = layer.getPopup();
+//             popup.setContent(popupContent2.formatted).update(); //OOP
+//         };
+//     });
+// // };
+
+
+// function updateLegend(attribute){
+    
+// };
+//-----------------/Panel---------------------//
+//-----------------legend---------------------//
+// function createLegend(map, attributes){
+//     var LegendControl = L.Control.extend({
+//         options: {position: 'topleft'},
+//         onAdd: function (map) {
+//             // create the control container with a particular class name
+//             var container = L.DomUtil.create('div', 'legend-control-container');
+//             // $(container).append(popupContent2.formatted);
+//             //add temporal legend div to container
+//             $(container).append('<div class="temporal-legend">')
+
+//             //Step 1: start attribute legend svg string
+//             var svg = '<svg id="attribute-legend" width="130px" height="130px">';
+//             //array of circle names to base loop on
+//             var circles = ["max", "mean", "min"];
+
+//             //Step 2: loop to add each circle and text to svg string
+//             for (var i=0; i<circles.length; i++){
+//                 //Step 3: assign the r and cy attributes
+//                 var radius = calcPropRadius(dataStats[circles[i]]);
+//                 var cy = 130 - radius;
+
+//                 //circle string
+//                 svg += '<circle class="legend-circle" id="' + circles[i] + '" r="' + radius + '"cy="' + cy + '" fill="#FAF8CB" fill-opacity="0.8" stroke="#000000" cx="65"/>';
+//             };
+
+//             //close svg string
+//             svg += "</svg>";
+
+//             return container;
+//         }
+//     });
+
+//     map.addControl(new LegendControl());
+//     var index = $('.range-slider').val();  //-->default index value = 0 (before clicking any button!)
+//     console.log(index) //--> default attributes[0] = "PASS_2012"
+//     $('.step').click(function(){
+//         //get the old index value
+//         var index = $('.range-slider').val(); 
+//         //Step 6: increment or decrement depending on button clicked
+//         if ($(this).attr('id') == 'forward'){
+//             index++;
+//             //Step 7: if past the last attribute, wrap around to first attribute
+//             index = index > 6 ? 0 : index;
+//         } else if ($(this).attr('id') == 'reverse'){
+//             index--;
+//             //Step 7: if past the first attribute, wrap around to last attribute
+//             index = index < 0 ? 6 : index;
+//         };
+//         console.log('255:',index) //--> default attributes[0] = "PASS_2012"
+//     });
+//     $('.legend-control-container').append("<p>Passenger in "+ attributes[index].substr(5,8)+":</p>");
+    // updateLegend(mymap,attributes[index]);
+
+
+// };
+
+
+    
 
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//-------------OOP---------------//
+function PopupContent(properties, attribute){
+    this.properties = properties;
+    this.attribute = attribute;
+    this.year = attribute.split("_")[1];
+    this.population = this.properties[attribute];
+    this.formatted = "<p><b>Station Name:</b> " + this.properties.STNNAME + "</p><p><b>Passengers in " + this.year + ":</b> " + this.population + " million</p>";
+};
+//-------------/OOP---------------//
+
+//-------------Process data, Return attrubutes arrays-----------------------//
 function processData(data){
     //empty array to hold attributes
     var attributes = [];
@@ -303,6 +390,9 @@ function processData(data){
     };
     return attributes;
 };
+//-------------/Process data, Return attrubutes arrays-----------------------//
+
+
 
 
 

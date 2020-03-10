@@ -6,32 +6,34 @@
 }
 
 .legend-control-container {
-    width: 100px;
-    height: 100px;
+    width: 130px;
+    height: 160px;
+    padding: 33px;
+    font-weight: bold;
     background-color: rgb(77, 77, 138,0.9);
-    border-radius: 20px;
-    padding: 10px;
-    line-height: 45px;
+    border-radius: 100px;
     text-align: center;
-    border: solid gray 0px; 
 }
 
 .sequence-control-container {
     width: 300px;
-    height: 30px;
+    height: 20px;
     background-color: rgb(77, 77, 138,0.9);
     border-radius: 20px;
-    padding: 10px;
-    line-height: 45px;
-    text-align: center;
+    padding: 30px;
+    line-height: 0px;
+    text-align:center;
     border: solid gray 0px;
 }
+
+
+
 
 .range-slider {
     width: 200px;
 }
 
-.temperal-legend{
+#temporal-legend{
     width: 80px;
 }
 
