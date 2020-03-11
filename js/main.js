@@ -127,7 +127,7 @@ function createSequenceControls(attributes){
         onAdd: function () { //onnAdd() always is required for a new Leaflet control!
             // create the control container div with a particular class name; more convenient than document.createElement() method.
             var container = L.DomUtil.create('div', 'sequence-control-container');
-            $(container).append('<h1>Year from 2012-2018</h1>');
+            $(container).append('<h2>Year from 2012-2018</h2>');
             //create range input element (slider)
             $(container).append('<input class="range-slider" type="range">');
             //add skip buttons
@@ -152,68 +152,73 @@ function createSequenceControls(attributes){
             $(container).append('<div class="temporal-legend">')
 
             //Step 1: start attribute legend svg string
-            var svg = '<svg id="attribute-legend" width="130px" height="130px">';
+            svg = '<svg id="attribute-legend" width="130px" height="130px">';
             //array of circle names to base loop on
             var circles = ["max", "mean", "min"];
-
             //Step 2: loop to add each circle and text to svg string
             for (var i=0; i<circles.length; i++){
                 //Step 3: assign the r and cy attributes
                 var radius = calcPropRadius(dataStats[circles[i]]);
-                var cy = 130 - radius;
-
+                var cy = 130 - radius; 
                 //circle string
                 svg += '<circle class="legend-circle" id="' + circles[i] + '" r="' + radius + '"cy="' + cy + '" fill="#FAF8CB" fill-opacity="0.8" stroke="#000000" cx="65"/>';
-            };
 
+                //evenly space out labels
+                var textY = i * 50 + 20/(i*i);
+
+                //text string
+                svg += '<text id="' + circles[i] + '-text" x="65" y="' + textY + '" transform="rotate(-5,300,-40)" class = "legend">' + Math.round(dataStats[circles[i]]*100)/100 + "thousand" + '</text>';
+
+            };
             //close svg string
             svg += "</svg>";
+
+            index = $('.range-slider').val()
+            word = "<h1>Passenger in "+ attributes[index].substr(5,8)+":</h1>"
+
+
+            //add attribute legend svg to container
+            $(container).html(word+"<br>"+svg);   
 
             return container;
         }
     });
-
-    mymap.addControl(new LegendControl());
     mymap.addControl(new SequenceControl());
-
-    //set slider attributes
+    // //set slider attributes
     $('.range-slider').attr({
         max: 6,
         min: 0,
         value: 0,
         step: 1
-    });
+    }); 
+    mymap.addControl(new LegendControl()); //after slider attributes to get the index = $('.range-slider').val() = 0
     $('#reverse').html('<img src="img/reverse.png">');
     $('#forward').html('<img src="img/forward.png">');
-    //var index = $('.range-slider').val();  //-->default index value = 0 (before clicking any button!)
-    //console.log('190:',index) //--> default attributes[0] = "PASS_2012"
-    // var word = "<p>Passenger in "+ attributes[index].substr(5,8)+":</p>"
-    // $('.legend-control-container').append(word);
-    var word = "<h1>Passenger in "+ attributes[0].substr(5,8)+":</h1>"
-    $('.legend-control-container').html(word); 
+
     //click listener for buttons (Add listeners after adding control!)
     $('.step').click(function(){
         //get the old index value
-        var index = $('.range-slider').val(); 
+        // var index = $('.range-slider').val(); 
         //Step 6: increment or decrement depending on button clicked
         if ($(this).attr('id') == 'forward'){
             index++;
             //Step 7: if past the last attribute, wrap around to first attribute
             index = index > 6 ? 0 : index;
+            word = "<h1>Passenger in "+ attributes[index].substr(5,8)+":</h1>"
+
         } else if ($(this).attr('id') == 'reverse'){
             index--;
             //Step 7: if past the first attribute, wrap around to last attribute
             index = index < 0 ? 6 : index;
+            word = "<h1>Passenger in "+ attributes[index].substr(5,8)+":</h1>"
+
         };
         //Step 8: update slider
-        $('.range-slider').val(index);
+        // $('.range-slider').val(index);
         //Called in both step button and slider event listener handlers
         //Step 9: pass new attribute to update symbols
         updatePropSymbols(attributes[index]);
-        var word = "<h1>Passenger in "+ attributes[index].substr(5,8)+":</h1>"
-        $('.legend-control-container').html(word); 
-
-        
+        $('.legend-control-container').html(word+"<br>"+svg)
         // updateLegend(attributes[index]);
         
     });

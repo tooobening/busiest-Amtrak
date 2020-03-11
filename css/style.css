@@ -4,17 +4,11 @@
     display: inline-block;
 
 }
-
-.legend-control-container {
-    width: 130px;
-    height: 160px;
-    padding: 33px;
-    font-weight: bold;
-    background-color: rgb(77, 77, 138,0.9);
-    border-radius: 100px;
+#title{
+    margin: 5em;
     text-align: center;
 }
-
+/* Sequence Controller */
 .sequence-control-container {
     width: 300px;
     height: 20px;
@@ -26,14 +20,11 @@
     border: solid gray 0px;
 }
 
-
-
-
 .range-slider {
     width: 200px;
 }
 
-#temporal-legend{
+.temporal-legend{
     width: 80px;
 }
 
@@ -82,6 +73,21 @@
 }
 
 
-#temp{
-    float: right;
+/* legend */
+.legend-control-container {
+    width: 150px;
+    height: 200px;
+    padding: 35px;
+    font-weight: bold;
+    background-color: rgb(77, 77, 138,0.9);
+    border-radius: 100px;
+    text-align: center;
+}
+
+#legend{
+    width:10px;
+}
+#attribute-legend{
+    width:180px;
+    /* background-color: thistle; */
 }
