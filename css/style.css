@@ -5,8 +5,9 @@
 
 }
 #title{
-    margin: 5em;
+    margin: -0.8em;
     text-align: center;
+    padding:2px;
 }
 /* Sequence Controller */
 .sequence-control-container {
@@ -17,7 +18,7 @@
     padding: 30px;
     line-height: 0px;
     text-align:center;
-    border: solid gray 0px;
+    border-radius: solid gray 70px;
 }
 
 .range-slider {
@@ -76,18 +77,20 @@
 /* legend */
 .legend-control-container {
     width: 150px;
-    height: 200px;
+    height: 160px;
     padding: 35px;
     font-weight: bold;
     background-color: rgb(77, 77, 138,0.9);
-    border-radius: 100px;
+    border-radius:90px;
     text-align: center;
+
 }
 
 #legend{
-    width:10px;
+    width:100%;
 }
+
 #attribute-legend{
     width:180px;
-    /* background-color: thistle; */
+    border:10px;
 }

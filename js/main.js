@@ -57,8 +57,8 @@ function pointToLayer(feature, latlng, attributes){
     var attribute = attributes[0];
     //create marker options
     var options = {
-        fillColor: "#ffffcc",
-        color: "#001",
+        fillColor: "#FFD451",
+        color: "#ffffcc",
         weight: 1,
         opacity: 1,
         fillOpacity: 0.8
@@ -161,7 +161,7 @@ function createSequenceControls(attributes){
                 var radius = calcPropRadius(dataStats[circles[i]]);
                 var cy = 130 - radius; 
                 //circle string
-                svg += '<circle class="legend-circle" id="' + circles[i] + '" r="' + radius + '"cy="' + cy + '" fill="#FAF8CB" fill-opacity="0.8" stroke="#000000" cx="65"/>';
+                svg += '<circle class="legend-circle" id="' + circles[i] + '" r="' + radius + '"cy="' + cy + '" fill="#FFD451" fill-opacity="0.6" stroke="#ffffcc" cx="65"/>';
 
                 //evenly space out labels
                 var textY = i * 50 + 20/(i*i);
@@ -184,7 +184,7 @@ function createSequenceControls(attributes){
         }
     });
     mymap.addControl(new SequenceControl());
-    // //set slider attributes
+    //set slider attributes
     $('.range-slider').attr({
         max: 6,
         min: 0,
@@ -198,7 +198,7 @@ function createSequenceControls(attributes){
     //click listener for buttons (Add listeners after adding control!)
     $('.step').click(function(){
         //get the old index value
-        // var index = $('.range-slider').val(); 
+        //var index = $('.range-slider').val(); 
         //Step 6: increment or decrement depending on button clicked
         if ($(this).attr('id') == 'forward'){
             index++;
@@ -217,8 +217,9 @@ function createSequenceControls(attributes){
         // $('.range-slider').val(index);
         //Called in both step button and slider event listener handlers
         //Step 9: pass new attribute to update symbols
-        updatePropSymbols(attributes[index]);
         $('.legend-control-container').html(word+"<br>"+svg)
+
+        updatePropSymbols(attributes[index]);
         // updateLegend(attributes[index]);
         
     });
@@ -334,7 +335,7 @@ function PopupContent(properties, attribute){
     this.attribute = attribute;
     this.year = attribute.split("_")[1];
     this.population = this.properties[attribute];
-    this.formatted = "<p><b>Station Name:</b> " + this.properties.STNNAME + "</p><p><b>Passengers in " + this.year + ":</b> " + this.population + " million</p>";
+    this.formatted = "<p><b>Station Name:</b> " + this.properties.STNNAME + "</p><p><b>Passengers in " + this.year + ":</b> " + this.population + " thousand</p>";
 };
 //-------------/OOP---------------//
 
