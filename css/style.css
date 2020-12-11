@@ -1,3 +1,6 @@
+body {
+    background-color: #1a1f1a
+}
 #mapid { /*#id or .class*/
     height: 480px;
     width: 100%;
